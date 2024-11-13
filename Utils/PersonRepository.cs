@@ -12,35 +12,37 @@ namespace dpullaguaris5b.Utils
     {
         string dbPath;
         private SQLiteConnection conn;
-        public string status { get; set; }
+        public string Status { get; set; }
 
-        public PersonRepository(string path) {
+        public PersonRepository(string path)
+        {
             dbPath = path;
-
         }
+
         public void Init()
         {
             if (conn is not null)
                 return;
-            conn = new(dbPath);
+
+            conn = new SQLiteConnection(dbPath);
             conn.CreateTable<Persona>();
         }
 
         public void AddNewPerson(string name)
         {
-            int result = 0;
             try
             {
                 Init();
                 if (string.IsNullOrEmpty(name))
                     throw new Exception("El nombre es requerido");
-                Persona person = new() { Name = name };
-                result = conn.Insert(person);
-                status = string.Format("Dato Ingresado");
-            }
-            catch (Exception ex) {
-                status = string.Format("Error al Ingresar");
 
+                Persona person = new Persona() { Name = name };
+                conn.Insert(person);
+                Status = "Dato Ingresado";
+            }
+            catch (Exception)
+            {
+                Status = "Error al Ingresar";
             }
         }
 
@@ -51,12 +53,39 @@ namespace dpullaguaris5b.Utils
                 Init();
                 return conn.Table<Persona>().ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
-                status = string.Format("Error al listar");
+                Status = "Error al listar";
+                return new List<Persona>();
             }
-            return new List<Persona>();
+        }
+
+        public void DeletePerson(int id)
+        {
+            try
+            {
+                Init();
+                conn.Delete<Persona>(id);
+                Status = "Persona eliminada";
+            }
+            catch (Exception)
+            {
+                Status = "Error al eliminar";
+            }
+        }
+
+        public void UpdatePerson(Persona person)
+        {
+            try
+            {
+                Init();
+                conn.Update(person);
+                Status = "Persona actualizada";
+            }
+            catch (Exception)
+            {
+                Status = "Error al actualizar";
+            }
         }
     }
 }
